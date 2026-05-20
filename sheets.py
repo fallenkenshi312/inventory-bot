@@ -1,31 +1,43 @@
+import os
+import json
+import gspread
 from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
 
-SPREADSHEET_ID = "1ePL6iNZZQt1hkY5QiELfR8p_zMfNX6kLTy2QCckkzJk"
+# Load credentials from Render environment variable
+google_creds = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
-def update_sheet(transaction_type, data):
+# Google Sheets permissions
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
-    creds = Credentials.from_service_account_file(
-        "credentials.json",
-        scopes=["https://www.googleapis.com/auth/spreadsheets"]
-    )
+# Create credentials object
+creds = Credentials.from_service_account_info(
+    google_creds,
+    scopes=scopes
+)
 
-    service = build("sheets", "v4", credentials=creds)
+# Connect to Google Sheets
+client = gspread.authorize(creds)
 
-    sheet_name = "Purchase" if transaction_type == "Purchase" else "Sale"
+# Open your Google Sheet
+sheet = client.open("Inventory").sheet1
 
-    values = [[
+
+# Function to add transaction data
+def add_transaction(data):
+
+    row = [
+        data["type"],
         data["date"],
         data["party"],
-        "Porous Pipe",
-        data["qty"],
+        data["item"],
+        data["quantity"],
         data["rate"],
         data["amount"]
-    ]]
+    ]
 
-    service.spreadsheets().values().append(
-        spreadsheetId=SPREADSHEET_ID,
-        range=f"{sheet_name}!A2",
-        valueInputOption="USER_ENTERED",
-        body={"values": values}
-    ).execute()
+    sheet.append_row(row)
+
+    return "Transaction Added Successfully"

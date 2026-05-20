@@ -3,10 +3,10 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-# Load credentials from Render environment variable
+# Load Google credentials from Render environment variable
 google_creds = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
-# Google Sheets permissions
+# Google Sheets API scopes
 scopes = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -22,7 +22,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 # Open your Google Sheet
-sheet = client.open("Inventory").sheet1
+sheet = client.open("Porus Pipe Inventory").sheet1
 
 
 # Function to add transaction data

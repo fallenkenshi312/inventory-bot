@@ -1,33 +1,30 @@
-from fastapi import FastAPI, Request
-
-from classifier import classify_transaction, extract_data
-
-from sheets import update_sheet
+from fastapi import FastAPI
+from sheets import add_transaction
 
 app = FastAPI()
 
-@app.post("/webhook")
 
-async def webhook(request: Request):
+@app.get("/")
+def home():
+    return {"message": "Inventory Bot Running Successfully"}
 
-    data = await request.json()
 
-    try:
+@app.post("/add")
+def add_data():
 
-        message = data["entry"][0]["changes"][0]["value"]["messages"][0]
+    sample_data = {
+        "type": "Purchase",
+        "date": "2026-05-20",
+        "party": "ABC Manufacturer",
+        "item": "Porous Pipe",
+        "quantity": 100,
+        "rate": 50,
+        "amount": 5000
+    }
 
-        text = message["text"]["body"]
+    result = add_transaction(sample_data)
 
-        transaction_type = classify_transaction(text)
-
-        extracted_data = extract_data(text)
-
-        if transaction_type:
-
-            update_sheet(transaction_type, extracted_data)
-
-        return {"status": "success"}
-
-    except Exception as e:
-
-        return {"error": str(e)}
+    return {
+        "status": "success",
+        "message": result
+    }

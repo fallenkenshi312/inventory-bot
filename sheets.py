@@ -3,7 +3,7 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-# Load Google credentials from Render environment variable
+# Load Google credentials
 google_creds = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
 # Google Sheets API scopes
@@ -12,7 +12,7 @@ scopes = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Create credentials object
+# Create credentials
 creds = Credentials.from_service_account_info(
     google_creds,
     scopes=scopes
@@ -21,23 +21,12 @@ creds = Credentials.from_service_account_info(
 # Connect to Google Sheets
 client = gspread.authorize(creds)
 
-# Open your Google Sheet
+# Open sheet
 sheet = client.open("Porus Pipe Inventory").sheet1
 
 
-# Function to add transaction data
-def add_transaction(data):
+# Add message to sheet
+def update_sheet(message):
+    sheet.append_row([message])
 
-    row = [
-        data["type"],
-        data["date"],
-        data["party"],
-        data["item"],
-        data["quantity"],
-        data["rate"],
-        data["amount"]
-    ]
-
-    sheet.append_row(row)
-
-    return "Transaction Added Successfully"
+    return "Message Added Successfully"
